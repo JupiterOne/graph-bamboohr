@@ -1,16 +1,22 @@
 import { createMockStepExecutionContext } from '@jupiterone/integration-sdk-testing';
 
 import { IntegrationConfig } from '../types';
-import { fetchGroups, fetchUsers } from './access';
+import { fetchUsers } from './access';
 import { fetchAccountDetails } from './account';
+import { fetchCompanyDetails } from './company';
+import { fetchCompanyFiles } from './company-files';
+import { fetchEmployeeFiles } from './employee-files';
 
-const DEFAULT_CLIENT_ID = 'dummy-acme-client-id';
-const DEFAULT_CLIENT_SECRET = 'dummy-acme-client-secret';
+const DEFAULT_CLIENT_NAMESPACE = 'creativicetrial';
+const DEFAULT_CLIENT_ACCESS_TOKEN = 'client_access_token';
 
 const integrationConfig: IntegrationConfig = {
-  clientId: process.env.CLIENT_ID || DEFAULT_CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET || DEFAULT_CLIENT_SECRET,
+  clientNamespace: process.env.CLIENT_NAMESPACE || DEFAULT_CLIENT_NAMESPACE,
+  clientAccessToken:
+    process.env.CLIENT_ACCESS_TOKEN || DEFAULT_CLIENT_ACCESS_TOKEN,
 };
+
+jest.setTimeout(1000 * 100);
 
 test('should collect data', async () => {
   const context = createMockStepExecutionContext<IntegrationConfig>({
@@ -20,8 +26,10 @@ test('should collect data', async () => {
   // Simulates dependency graph execution.
   // See https://github.com/JupiterOne/sdk/issues/262.
   await fetchAccountDetails(context);
+  await fetchCompanyDetails(context);
   await fetchUsers(context);
-  await fetchGroups(context);
+  await fetchCompanyFiles(context);
+  await fetchEmployeeFiles(context);
 
   // Review snapshot, failure is a regression
   expect({
@@ -39,16 +47,55 @@ test('should collect data', async () => {
   expect(accounts).toMatchGraphObjectSchema({
     _class: ['Account'],
     schema: {
-      additionalProperties: false,
+      additionalProperties: true,
       properties: {
-        _type: { const: 'acme_account' },
-        manager: { type: 'string' },
+        _type: { const: 'bamboohr_account' },
         _rawData: {
           type: 'array',
           items: { type: 'object' },
         },
+        id: {
+          type: 'string',
+        },
+        webLink: {
+          type: 'string',
+        },
+        displayName: {
+          type: 'string',
+        },
+        email: {
+          type: 'string',
+        },
+        name: {
+          type: 'string',
+        },
       },
-      required: ['manager'],
+      required: [],
+    },
+  });
+
+  const companies = context.jobState.collectedEntities.filter((e) =>
+    e._class.includes('Organization'),
+  );
+  expect(companies.length).toBeGreaterThan(0);
+  expect(companies).toMatchGraphObjectSchema({
+    _class: ['Organization'],
+    schema: {
+      additionalProperties: true,
+      properties: {
+        _type: { const: 'bamboohr_company' },
+        _rawData: {
+          type: 'array',
+          items: { type: 'object' },
+        },
+        name: {
+          type: 'string',
+        },
+        webLink: {
+          type: 'string',
+        },
+      },
+      required: [],
     },
   });
 
@@ -59,40 +106,104 @@ test('should collect data', async () => {
   expect(users).toMatchGraphObjectSchema({
     _class: ['User'],
     schema: {
-      additionalProperties: false,
+      additionalProperties: true,
       properties: {
-        _type: { const: 'acme_user' },
-        firstName: { type: 'string' },
+        _type: { const: 'bamboohr_user' },
         _rawData: {
           type: 'array',
           items: { type: 'object' },
         },
+        id: {
+          type: 'string',
+        },
+        webLink: {
+          type: 'string',
+        },
+        employeeId: {
+          type: 'string',
+        },
+        username: {
+          type: 'string',
+        },
+        firstName: {
+          type: 'string',
+        },
+        lastName: {
+          type: 'string',
+        },
+        displayName: {
+          type: 'string',
+        },
+        email: {
+          type: 'string',
+        },
+        name: {
+          type: 'string',
+        },
       },
-      required: ['firstName'],
+      required: [],
     },
   });
 
-  const userGroups = context.jobState.collectedEntities.filter((e) =>
-    e._class.includes('UserGroup'),
+  const companyFiles = context.jobState.collectedEntities.filter((e) =>
+    e._class.includes('DataObject'),
   );
-  expect(userGroups.length).toBeGreaterThan(0);
-  expect(userGroups).toMatchGraphObjectSchema({
-    _class: ['UserGroup'],
+  expect(companyFiles.length).toBeGreaterThan(0);
+  expect(companyFiles).toMatchGraphObjectSchema({
+    _class: ['DataObject'],
     schema: {
-      additionalProperties: false,
+      additionalProperties: true,
       properties: {
-        _type: { const: 'acme_group' },
-        logoLink: {
-          type: 'string',
-          // Validate that the `logoLink` property has a URL format
-          format: 'url',
-        },
+        _type: { const: 'bamboohr_file' },
         _rawData: {
           type: 'array',
           items: { type: 'object' },
         },
+        id: {
+          type: 'string',
+        },
+        webLink: {
+          type: 'string',
+        },
+        name: {
+          type: 'string',
+        },
+        classification: {
+          type: 'string',
+        },
       },
-      required: ['logoLink'],
+      required: [],
+    },
+  });
+
+  const employeeFiles = context.jobState.collectedEntities.filter((e) =>
+    e._class.includes('DataObject'),
+  );
+  expect(employeeFiles.length).toBeGreaterThan(0);
+  expect(employeeFiles).toMatchGraphObjectSchema({
+    _class: ['DataObject'],
+    schema: {
+      additionalProperties: true,
+      properties: {
+        _type: { const: 'bamboohr_file' },
+        _rawData: {
+          type: 'array',
+          items: { type: 'object' },
+        },
+        id: {
+          type: 'string',
+        },
+        webLink: {
+          type: 'string',
+        },
+        name: {
+          type: 'string',
+        },
+        classification: {
+          type: 'string',
+        },
+      },
+      required: [],
     },
   });
 });

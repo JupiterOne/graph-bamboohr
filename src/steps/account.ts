@@ -5,46 +5,47 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 import { IntegrationConfig } from '../types';
+import { createAPIClient } from '../client';
+import { ACCOUNT_ENTITY_DATA_KEY, entities } from '../constants';
 
-export const ACCOUNT_ENTITY_KEY = 'entity:account';
+export function getAccountKey(email: string): string {
+  return `bamboohr_account:${email}`;
+}
 
 export async function fetchAccountDetails({
+  instance,
   jobState,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const accountEntity = await jobState.addEntity(
-    createIntegrationEntity({
-      entityData: {
-        source: {
-          id: 'acme-unique-account-id',
-          name: 'Example Co. Acme Account',
-        },
-        assign: {
-          _key: 'acme-unique-account-id',
-          _type: 'acme_account',
-          _class: 'Account',
-          mfaEnabled: true,
-          // This is a custom property that is not a part of the data model class
-          // hierarchy. See: https://github.com/JupiterOne/data-model/blob/master/src/schemas/Account.json
-          manager: 'Manager Name',
-        },
-      },
-    }),
-  );
+  const apiClient = createAPIClient(instance.config);
 
-  await jobState.setData(ACCOUNT_ENTITY_KEY, accountEntity);
+  const account = await apiClient.getAccount();
+  const accountEntity = createIntegrationEntity({
+    entityData: {
+      source: account,
+      assign: {
+        _key: getAccountKey(account.email),
+        _type: entities.ACCOUNT._type,
+        _class: entities.ACCOUNT._class,
+        id: `${account.id}`,
+        webLink: `https://${instance.config.clientNamespace}.bamboohr.com/employees/employee.php?id=${account.id}`,
+        displayName: `${account.firstName}_${account.lastName}`,
+        email: account.email,
+        name: `${account.firstName}_${account.lastName}`,
+      },
+    },
+  });
+
+  await Promise.all([
+    jobState.addEntity(accountEntity),
+    jobState.setData(ACCOUNT_ENTITY_DATA_KEY, accountEntity),
+  ]);
 }
 
 export const accountSteps: IntegrationStep<IntegrationConfig>[] = [
   {
     id: 'fetch-account',
     name: 'Fetch Account Details',
-    entities: [
-      {
-        resourceName: 'Account',
-        _type: 'acme_account',
-        _class: 'Account',
-      },
-    ],
+    entities: [entities.ACCOUNT],
     relationships: [],
     dependsOn: [],
     executionHandler: fetchAccountDetails,

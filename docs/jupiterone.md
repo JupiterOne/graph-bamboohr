@@ -35,9 +35,12 @@ https://github.com/JupiterOne/sdk/blob/master/docs/integrations/development.md
 
 The following entities are created:
 
-| Resources | Entity `_type` | Entity `_class` |
-| --------- | -------------- | --------------- |
-| Account   | `acme_account` | `Account`       |
+| Resources | Entity `_type`     | Entity `_class` |
+| --------- | ------------------ | --------------- |
+| Account   | `bamboohr_account` | `Account`       |
+| User      | `bamboohr_user`    | `User`          |
+| File      | `bamboohr_file`    | `DataObject`    |
+| Company   | `bamboohr_company` | `Organization`  |
 
 ### Relationships
 
@@ -45,9 +48,10 @@ The following relationships are created/mapped:
 
 | Source Entity `_type` | Relationship `_class` | Target Entity `_type` |
 | --------------------- | --------------------- | --------------------- |
-| `acme_account`        | **HAS**               | `acme_user`           |
-| `acme_account`        | **HAS**               | `acme_group`          |
-| `acme_group`          | **HAS**               | `acme_user`           |
+| `bamboohr_account`    | **HAS**               | `bamboohr_user`       |
+| `bamboohr_user`       | **HAS**               | `bamboohr_file`       |
+| `bamboohr_account`    | **HAS**               | `bamboohr_company`    |
+| `bamboohr_company`    | **HAS**               | `bamboohr_file`       |
 
 <!--
 ********************************************************************************

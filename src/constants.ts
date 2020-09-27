@@ -5,7 +5,6 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 export const ACCOUNT_ENTITY_DATA_KEY = 'entity:account';
-export const COMPANY_ENTITY_DATA_KEY = 'entity:company';
 
 type EntityConstantKeys = 'ACCOUNT' | 'COMPANY' | 'USER' | 'FILE';
 

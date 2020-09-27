@@ -64,20 +64,6 @@ export class APIClient {
     }
   }
 
-  public async getAccount(): Promise<BambooHRUser> {
-    const response = await this.request(
-      this.withBaseUri('v1/employees/0/?fields=email,firstName,lastName'),
-    );
-
-    const body: BambooHRUser = await response.json();
-
-    if (!body.id) {
-      throw new Error('Unable to find admin user from users response');
-    }
-
-    return body;
-  }
-
   /**
    * Iterates each user resource in the provider.
    *

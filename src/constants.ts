@@ -35,8 +35,6 @@ export const entities: Record<EntityConstantKeys, StepEntityMetadata> = {
 type RelationshipConstantKeys =
   | 'ACCOUNT_HAS_USER'
   | 'ACCOUNT_HAS_FILE'
-  | 'ACCOUNT_HAS_COMPANY'
-  | 'COMPANY_HAS_FILE'
   | 'USER_HAS_FILE';
 
 export const relationships: Record<
@@ -53,18 +51,6 @@ export const relationships: Record<
     _type: 'bamboohr_account_has_file',
     _class: RelationshipClass.HAS,
     sourceType: entities.ACCOUNT._type,
-    targetType: entities.FILE._type,
-  },
-  ACCOUNT_HAS_COMPANY: {
-    _type: 'bamboohr_account_has_company',
-    _class: RelationshipClass.HAS,
-    sourceType: entities.ACCOUNT._type,
-    targetType: entities.COMPANY._type,
-  },
-  COMPANY_HAS_FILE: {
-    _type: 'bamboohr_company_has_file',
-    _class: RelationshipClass.HAS,
-    sourceType: entities.COMPANY._type,
     targetType: entities.FILE._type,
   },
   USER_HAS_FILE: {

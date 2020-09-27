@@ -5,32 +5,29 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 import { IntegrationConfig } from '../types';
-import { createAPIClient } from '../client';
 import { ACCOUNT_ENTITY_DATA_KEY, entities } from '../constants';
 
-export function getAccountKey(email: string): string {
-  return `bamboohr_account:${email}`;
+export function getAccountKey(name: string): string {
+  return `bamboohr_account:${name}`;
 }
 
 export async function fetchAccountDetails({
   instance,
   jobState,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = createAPIClient(instance.config);
+  const company = {
+    name: instance.config.clientNamespace,
+  };
 
-  const account = await apiClient.getAccount();
   const accountEntity = createIntegrationEntity({
     entityData: {
-      source: account,
+      source: company,
       assign: {
-        _key: getAccountKey(account.email),
+        _key: getAccountKey(company.name),
         _type: entities.ACCOUNT._type,
         _class: entities.ACCOUNT._class,
-        id: `${account.id}`,
-        webLink: `https://${instance.config.clientNamespace}.bamboohr.com/employees/employee.php?id=${account.id}`,
-        displayName: `${account.firstName}_${account.lastName}`,
-        email: account.email,
-        name: `${account.firstName}_${account.lastName}`,
+        webLink: `https://${company.name}.bamboohr.com`,
+        name: company.name,
       },
     },
   });

@@ -8,7 +8,7 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 import { createAPIClient } from '../client';
-import { COMPANY_ENTITY_DATA_KEY, entities, relationships } from '../constants';
+import { ACCOUNT_ENTITY_DATA_KEY, entities, relationships } from '../constants';
 import { IntegrationConfig } from '../types';
 
 export function getCompanyFileKey(id: number): string {
@@ -21,8 +21,8 @@ export async function fetchCompanyFiles({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   const apiClient = createAPIClient(instance.config);
 
-  const companyEntity = (await jobState.getData(
-    COMPANY_ENTITY_DATA_KEY,
+  const accountEntity = (await jobState.getData(
+    ACCOUNT_ENTITY_DATA_KEY,
   )) as Entity;
 
   await apiClient.iterateCompanyFiles(async (file) => {
@@ -46,7 +46,7 @@ export async function fetchCompanyFiles({
       jobState.addRelationship(
         createDirectRelationship({
           _class: RelationshipClass.HAS,
-          from: companyEntity,
+          from: accountEntity,
           to: fileEntity,
         }),
       ),
@@ -59,8 +59,8 @@ export const companyFilesSteps: IntegrationStep<IntegrationConfig>[] = [
     id: 'fetch-company-files',
     name: 'Fetch Company Files',
     entities: [entities.FILE],
-    relationships: [relationships.COMPANY_HAS_FILE],
-    dependsOn: ['fetch-company'],
+    relationships: [relationships.ACCOUNT_HAS_FILE],
+    dependsOn: ['fetch-account'],
     executionHandler: fetchCompanyFiles,
   },
 ];

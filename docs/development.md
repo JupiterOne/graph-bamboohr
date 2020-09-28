@@ -1,28 +1,62 @@
 # Development
 
-Add details here to give a brief overview of how to work with the provider APIs.
-Please reference any SDKs or API docs used to help build the integration here.
+This integration focuses on [BambooHR](https://www.bamboohr.com/) and is using
+[BambooHR REST API](https://documentation.bamboohr.com/reference) for
+interacting with the BambooHR platform.
 
-## Prerequisites
-
-Supply details about software or tooling (like maybe Docker or Terraform) that
-is needed for development here.
-
-Please supply references to documentation that details how to install those
-dependencies here.
-
-Tools like Node.js and NPM are already covered in the [README](../README.md) so
-don't bother documenting that here.
+The
+[BambooHR's Getting Started](https://documentation.bamboohr.com/docs/getting-started)
+section can also be useful.
 
 ## Provider account setup
 
-Please provide information about the steps needed to create an account with a
-provider. Images and references to a provider's documentation is very helpful
-for new developers picking up your work.
+To set up a BambooHR account, please follow these steps:
+
+1. Visit the [BambooHR Sign Up](https://www.bamboohr.com/signup/) page, enter
+   the necessary form details and submit the form/follow through with the
+   procedure. The form is organizated into 2 pages, one asking for your user
+   details while the next page asks for company related info.
+2. Once done, you will be redirected to the dashboard as well as receive an
+   email regarding your sign up.
 
 ## Authentication
 
-Supply details here for information on how to authenticate with a provider so
-that developers have an idea of what's needed to hit APIs. It may be useful to
-provide explanations for each value specified in
-[../src/instanceConfigFields.json](../src/instanceConfigFields.json).
+1. Once logged in, click on your profile in the top right section.
+
+![Profile menu](images/profile-menu.png)
+
+2. Next you need to click on "API Keys" item.
+
+3. You'll be taken to the "My API Keys" page where you can create a new API key
+   by clicking on the "Add New Key" button.
+
+![Add new key](images/add-new-key.png)
+
+4. After completing the previous step you'll see a modal that asks you to input
+   the API key name. After entering your desired name press "Generate key".
+
+![Add new key modal](images/add-new-key-modal.png)
+
+5. A new modal will appear containing the access token. It is shown only once,
+   so make sure to save it somewhere or you'll need to re-create it again later.
+
+6. Copy the API Key, create a .env file at the root of this project, and set the
+   CLIENT_ACCESS_TOKEN variable with the copied value.
+
+```bash
+CLIENT_ACCESS_TOKEN="paste the access token value here"
+```
+
+6. The final step is to include the hostname in the `.env` file. Put the host
+   part of the URL that your dashboard (and organization) is pointed at
+   (https://[this part].bamboohr.com).
+
+```bash
+CLIENT_ACCESS_TOKEN="paste the access token value here"
+CLIENT_NAMESPACE="your organization name"
+```
+
+After following the above steps, you should now be able to start contributing to
+this integration. The integration will pull in the `CLIENT_ACCESS_TOKEN` and
+`CLIENT_NAMESPACE` variables from the `.env` file and use them when making
+requests.

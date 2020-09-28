@@ -11,9 +11,9 @@ export default async function validateInvocation(
 ) {
   const { config } = context.instance;
 
-  if (!config.clientId || !config.clientSecret) {
+  if (!config.clientNamespace || !config.clientAccessToken) {
     throw new IntegrationValidationError(
-      'Config requires all of {clientId, clientSecret}',
+      'Config requires all of {clientNamespace, clientAccessToken}',
     );
   }
 

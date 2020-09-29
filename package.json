@@ -1,7 +1,7 @@
 {
-  "name": "@jupiterone/integration-template",
+  "name": "@jupiterone/graph-bamboohr",
   "version": "1.0.0",
-  "description": "A JupiterOne Integration",
+  "description": "A Graph Conversion Project for BambooHR",
   "license": "MPL-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

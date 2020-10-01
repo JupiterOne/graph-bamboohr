@@ -34,6 +34,7 @@ export async function fetchUsers({
           _type: entities.USER._type,
           _class: entities.USER._class,
           id: `${user.id}`,
+          active: user.status === 'enabled',
           webLink: `https://${instance.config.clientNamespace}.bamboohr.com/employees/employee.php?id=${user.employeeId}`,
           employeeId: `${user.employeeId}`,
           displayName: `${user.firstName} ${user.lastName}`,

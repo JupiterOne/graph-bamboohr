@@ -12,6 +12,7 @@ and this project adheres to
 
 - Added `location`, `jobTitle`, `workEmail`, `department`, `division`,
   `mobilePhone`, and `workPhone` properties to `bamboohr_user` entity.
+- Set `User.active === true` when `User.status === 'enabled'`
 
 ## v0.1.0 - 2020-09-28
 

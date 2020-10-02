@@ -61,7 +61,7 @@ export type BambooHRUser = {
   firstName: string;
   lastName: string;
   email: string;
-  status: boolean;
+  status: 'enabled' | string;
   lastLogin: string;
   uri: string;
   employeeDetails: Partial<BambooHREmployeeDetails>;

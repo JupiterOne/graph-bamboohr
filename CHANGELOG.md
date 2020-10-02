@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## v0.2.0 - 2020-10-02
+
 ### Added
 
 - Added `location`, `jobTitle`, `workEmail`, `department`, `division`,

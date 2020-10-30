@@ -26,8 +26,8 @@ The following entities are created:
 | Resources | Entity `_type`     | Entity `_class` |
 | --------- | ------------------ | --------------- |
 | Account   | `bamboohr_account` | `Account`       |
-| User      | `bamboohr_user`    | `User`          |
 | File      | `bamboohr_file`    | `DataObject`    |
+| User      | `bamboohr_user`    | `User`          |
 
 ### Relationships
 
@@ -35,9 +35,9 @@ The following relationships are created/mapped:
 
 | Source Entity `_type` | Relationship `_class` | Target Entity `_type` |
 | --------------------- | --------------------- | --------------------- |
+| `bamboohr_account`    | **HAS**               | `bamboohr_file`       |
 | `bamboohr_account`    | **HAS**               | `bamboohr_user`       |
 | `bamboohr_user`       | **HAS**               | `bamboohr_file`       |
-| `bamboohr_account`    | **HAS**               | `bamboohr_file`       |
 
 <!--
 ********************************************************************************

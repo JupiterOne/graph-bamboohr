@@ -11,8 +11,8 @@ import { createAPIClient } from '../client';
 import { ACCOUNT_ENTITY_DATA_KEY, entities, relationships } from '../constants';
 import { IntegrationConfig } from '../types';
 
-export function getUserKey(email: string): string {
-  return `bamboohr_user:${email}`;
+export function getUserKey(id: number): string {
+  return `bamboohr_user:${id}`;
 }
 
 export async function fetchUsers({
@@ -30,7 +30,7 @@ export async function fetchUsers({
       entityData: {
         source: user,
         assign: {
-          _key: getUserKey(user.email),
+          _key: getUserKey(user.id),
           _type: entities.USER._type,
           _class: entities.USER._class,
           id: `${user.id}`,

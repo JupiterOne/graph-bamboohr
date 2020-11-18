@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.3.2 - 2020-11-20
+
+### Changed
+
+- Use `id` property for `bamboohr_user._key` instead of `email`, which can be
+  null.
+  
 ## 0.3.1 - 2020-11-19
 
 ### Changed

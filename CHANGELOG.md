@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Do not use `Promise.all` to resolve multiple promises. `Promise.all` fails
+  fast, rejecting instantly once any of the promises rejects. This causes
+  unhandled promise rejections when more than one promise fails in array.
+
 ## 0.3.0 - 2020-10-29
 
 - Upgrade SDK v4

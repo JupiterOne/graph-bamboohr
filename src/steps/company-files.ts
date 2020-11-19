@@ -41,16 +41,14 @@ export async function fetchCompanyFiles({
       },
     });
 
-    await Promise.all([
-      jobState.addEntity(fileEntity),
-      jobState.addRelationship(
-        createDirectRelationship({
-          _class: RelationshipClass.HAS,
-          from: accountEntity,
-          to: fileEntity,
-        }),
-      ),
-    ]);
+    await jobState.addEntity(fileEntity);
+    await jobState.addRelationship(
+      createDirectRelationship({
+        _class: RelationshipClass.HAS,
+        from: accountEntity,
+        to: fileEntity,
+      }),
+    );
   });
 }
 

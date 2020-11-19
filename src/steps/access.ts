@@ -54,16 +54,14 @@ export async function fetchUsers({
       },
     });
 
-    await Promise.all([
-      jobState.addEntity(userEntity),
-      jobState.addRelationship(
-        createDirectRelationship({
-          _class: RelationshipClass.HAS,
-          from: accountEntity,
-          to: userEntity,
-        }),
-      ),
-    ]);
+    await jobState.addEntity(userEntity);
+    await jobState.addRelationship(
+      createDirectRelationship({
+        _class: RelationshipClass.HAS,
+        from: accountEntity,
+        to: userEntity,
+      }),
+    );
   });
 }
 

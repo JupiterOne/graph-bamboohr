@@ -32,10 +32,8 @@ export async function fetchAccountDetails({
     },
   });
 
-  await Promise.all([
-    jobState.addEntity(accountEntity),
-    jobState.setData(ACCOUNT_ENTITY_DATA_KEY, accountEntity),
-  ]);
+  await jobState.addEntity(accountEntity);
+  await jobState.setData(ACCOUNT_ENTITY_DATA_KEY, accountEntity);
 }
 
 export const accountSteps: IntegrationStep<IntegrationConfig>[] = [

@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.3.1 - 2020-11-19
+
 ### Changed
 
 - Do not use `Promise.all` to resolve multiple promises. `Promise.all` fails

@@ -50,6 +50,7 @@ export async function fetchUsers({
           division: user.employeeDetails?.division,
           mobilePhone: user.employeeDetails?.mobilePhone,
           workPhone: user.employeeDetails?.workPhone,
+          supervisor: user.employeeDetails?.supervisor,
         },
       },
     });

@@ -39,6 +39,7 @@ export type BambooHREmployeeDetails = {
   gender: string;
   jobTitle: string;
   workPhone: string;
+  supervisor: string;
   mobilePhone: string;
   workEmail: string;
   department: string;

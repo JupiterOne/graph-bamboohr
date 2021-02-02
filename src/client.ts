@@ -1,24 +1,43 @@
 import fetch, { Response } from 'node-fetch';
+
 import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
+
 import {
-  IntegrationConfig,
-  StatusError,
-  BambooHRUser,
-  BambooHRFilesResponse,
-  BambooHRFile,
   BambooHREmployeeDetails,
   BambooHREmployeesMap,
+  BambooHRFile,
+  BambooHRFilesResponse,
+  BambooHRUser,
+  IntegrationConfig,
+  StatusError,
 } from './types';
 
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
+
+export function normalizeClientNamespace(
+  userInput: string,
+): string | undefined {
+  const match = /(?:https?:\/\/)?([^.]+)(?:\.bamboohr\.com)?/.exec(userInput);
+  if (match) {
+    return match[1];
+  }
+}
 
 export class APIClient {
   private readonly clientNamespace: string;
   private readonly clientAccessToken: string;
 
   constructor(readonly config: IntegrationConfig) {
-    this.clientNamespace = config.clientNamespace;
+    this.clientNamespace = normalizeClientNamespace(config.clientNamespace)!;
     this.clientAccessToken = config.clientAccessToken;
+
+    if (!this.clientNamespace) {
+      throw new Error(
+        `Illegal clientNamespace value: ${JSON.stringify(
+          config.clientNamespace,
+        )}`,
+      );
+    }
   }
 
   private withBaseUri(path: string): string {

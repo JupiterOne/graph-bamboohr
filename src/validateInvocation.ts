@@ -3,7 +3,7 @@ import {
   IntegrationValidationError,
 } from '@jupiterone/integration-sdk-core';
 
-import { createAPIClient } from './client';
+import { createAPIClient, normalizeClientNamespace } from './client';
 import { IntegrationConfig } from './types';
 
 export default async function validateInvocation(
@@ -14,6 +14,12 @@ export default async function validateInvocation(
   if (!config.clientNamespace || !config.clientAccessToken) {
     throw new IntegrationValidationError(
       'Config requires all of {clientNamespace, clientAccessToken}',
+    );
+  }
+
+  if (!normalizeClientNamespace(config.clientNamespace)) {
+    throw new IntegrationValidationError(
+      `Namespace is invalid. Please ensure the value is the subdomain such as 'jupiterone' in 'https://jupiterone.bamboohr.com'.`,
     );
   }
 

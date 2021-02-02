@@ -1,7 +1,4 @@
-import {
-  IntegrationProviderAuthenticationError,
-  IntegrationValidationError,
-} from '@jupiterone/integration-sdk-core';
+import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
 import {
   createMockExecutionContext,
   setupRecording,
@@ -15,11 +12,21 @@ it('requires valid config', async () => {
     instanceConfig: {} as IntegrationConfig,
   });
 
-  try {
-    await validateInvocation(executionContext);
-  } catch (e) {
-    expect(e instanceof IntegrationValidationError).toBe(true);
-  }
+  await expect(validateInvocation(executionContext)).rejects.toThrow(
+    /Config requires/,
+  );
+});
+
+it('requires a valid namespace', async () => {
+  const executionContext = createMockExecutionContext<IntegrationConfig>({
+    instanceConfig: {
+      clientNamespace: 'https://whoknows.where.com',
+    } as IntegrationConfig,
+  });
+
+  await expect(validateInvocation(executionContext)).rejects.toThrow(
+    /Namespace/,
+  );
 });
 
 it('auth error', async () => {

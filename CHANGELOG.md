@@ -8,11 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
-## Added
+### Added
 
 - Added some grace to namespace configuration to allow for
   `jupiterone.bamboohr.com` and `https://jupiterone.bamboohr.com` as well as
   `jupiterone`
+
+### Updated
+
+- Update integration documentation
 
 ## 0.3.3 - 2020-11-30
 

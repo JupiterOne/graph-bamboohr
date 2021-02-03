@@ -8,7 +8,9 @@ and this project adheres to
 
 ## [Unreleased]
 
-## Added
+## 0.3.4 - 2021-02-03
+
+### Added
 
 - Added some grace to namespace configuration to allow for
   `jupiterone.bamboohr.com` and `https://jupiterone.bamboohr.com` as well as
@@ -16,6 +18,8 @@ and this project adheres to
 - Fix authentication validation check that failed when there is no employee `0`
 
 ## 0.3.3 - 2020-11-30
+
+### Added
 
 - Add the `supervisor` property to employee entities
 

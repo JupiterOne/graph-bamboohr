@@ -66,7 +66,11 @@ export class APIClient {
         'GET',
       );
 
-      if (response.status !== 200) {
+      // A 200 is expected when authentication works and the employee exists A
+      // 404 is expected when authentication works and the employee does not
+      // exist There may be a better endpoint to verify authentication, but this
+      // one seems the most lightweight at this time.
+      if (response.status !== 200 && response.status !== 404) {
         throw new StatusError({
           message: 'Provider authentication failed',
           statusCode: response.status,

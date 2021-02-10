@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Updated
+
+- Update integration documentation
+
 ## 0.3.4 - 2021-02-03
 
 ### Added

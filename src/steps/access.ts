@@ -7,7 +7,7 @@ import {
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
-import { createAPIClient } from '../client';
+import { APIClient } from '../client';
 import { ACCOUNT_ENTITY_DATA_KEY, entities, relationships } from '../constants';
 import { IntegrationConfig } from '../types';
 
@@ -15,11 +15,15 @@ export function getUserKey(id: number): string {
   return `bamboohr_user:${id}`;
 }
 
+export function getEmployeeKey(id: string | number): string {
+  return `bamboohr_employee:${id}`;
+}
+
 export async function fetchUsers({
   instance,
   jobState,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = createAPIClient(instance.config);
+  const apiClient = new APIClient(instance.config);
 
   const accountEntity = (await jobState.getData(
     ACCOUNT_ENTITY_DATA_KEY,
@@ -63,16 +67,90 @@ export async function fetchUsers({
         to: userEntity,
       }),
     );
+
+    const employeeEntity = await jobState.findEntity(
+      getEmployeeKey(user.employeeId),
+    );
+    if (employeeEntity) {
+      await jobState.addRelationship(
+        createDirectRelationship({
+          _class: RelationshipClass.IS,
+          from: userEntity,
+          to: employeeEntity,
+        }),
+      );
+    }
+  });
+}
+
+export async function fetchEmployees({
+  instance,
+  jobState,
+}: IntegrationStepExecutionContext<IntegrationConfig>) {
+  const apiClient = new APIClient(instance.config);
+
+  const accountEntity = (await jobState.getData(
+    ACCOUNT_ENTITY_DATA_KEY,
+  )) as Entity;
+
+  await apiClient.iterateEmployees(async (employee) => {
+    const employeeEntity = createIntegrationEntity({
+      entityData: {
+        source: employee,
+        assign: {
+          _key: getEmployeeKey(employee.id),
+          _type: entities.EMPLOYEE._type,
+          _class: entities.EMPLOYEE._class,
+          id: employee.id,
+          webLink: `https://${instance.config.clientNamespace}.bamboohr.com/employees/employee.php?id=${employee.id}`,
+          displayName: `${employee.firstName} ${employee.lastName}`,
+          name: `${employee.firstName} ${employee.lastName}`,
+          username: employee.workEmail,
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+          email: employee.workEmail,
+          location: employee.location,
+          jobTitle: employee.jobTitle,
+          workEmail: employee.workEmail,
+          department: employee.department,
+          division: employee.division,
+          mobilePhone: employee.mobilePhone,
+          workPhone: employee.workPhone,
+          supervisor: employee.supervisor,
+          category: 'hr',
+        },
+      },
+    });
+
+    await jobState.addEntity(employeeEntity);
+    await jobState.addRelationship(
+      createDirectRelationship({
+        _class: RelationshipClass.HAS,
+        from: accountEntity,
+        to: employeeEntity,
+      }),
+    );
   });
 }
 
 export const accessSteps: IntegrationStep<IntegrationConfig>[] = [
   {
+    id: 'fetch-employees',
+    name: 'Fetch Employees',
+    entities: [entities.EMPLOYEE],
+    relationships: [relationships.ACCOUNT_HAS_EMPLOYEE],
+    dependsOn: ['fetch-account'],
+    executionHandler: fetchEmployees,
+  },
+  {
     id: 'fetch-users',
     name: 'Fetch Users',
     entities: [entities.USER],
-    relationships: [relationships.ACCOUNT_HAS_USER],
-    dependsOn: ['fetch-account'],
+    relationships: [
+      relationships.ACCOUNT_HAS_USER,
+      relationships.USER_IS_EMPLOYEE,
+    ],
+    dependsOn: ['fetch-account', 'fetch-employees'],
     executionHandler: fetchUsers,
   },
 ];

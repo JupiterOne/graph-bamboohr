@@ -30,30 +30,26 @@ export class StatusError extends Error {
   }
 }
 
-export type BambooHREmployeeDetails = {
+export type BambooHREmployee = {
   id: string;
   displayName: string;
   firstName: string;
   lastName: string;
-  preferredName: string | null;
+  preferredName?: string;
   gender: string;
-  jobTitle: string;
-  workPhone: string;
+  jobTitle?: string;
+  workPhone?: string;
   supervisor: string;
-  mobilePhone: string;
-  workEmail: string;
+  mobilePhone?: string;
+  workEmail?: string;
   department: string;
   location: string;
-  division: string;
+  division?: string;
   linkedIn: string;
   workPhoneExtension: string;
   photoUploaded: boolean;
   photoUrl: string;
   canUploadPhoto: number;
-};
-
-export type BambooHREmployeesMap = {
-  [id: string]: BambooHREmployeeDetails;
 };
 
 export type BambooHRUser = {
@@ -65,7 +61,7 @@ export type BambooHRUser = {
   status: 'enabled' | string;
   lastLogin: string;
   uri: string;
-  employeeDetails?: Partial<BambooHREmployeeDetails>;
+  employeeDetails?: Partial<BambooHREmployee>;
 };
 
 export type BambooHRFile = {

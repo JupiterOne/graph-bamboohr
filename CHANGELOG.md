@@ -8,6 +8,24 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.4.0 - 2021-08-13
+
+### Added
+
+- Added spec declaration
+- Added support for ingesting the following **new** entities:
+
+  | Resources | Entity `_type`      | Entity `_class` |
+  | --------- | ------------------- | --------------- |
+  | Employee  | `bamboohr_employee` | `Record`        |
+
+- Added support for ingesting the following **new** relationships:
+
+  | Source             | \_class | Target              |
+  | ------------------ | ------- | ------------------- |
+  | `bamboohr_account` | **HAS** | `bamboohr_employee` |
+  | `bamboohr_user`    | **IS**  | `bamboohr_employee` |
+
 ### Updated
 
 - Update integration documentation

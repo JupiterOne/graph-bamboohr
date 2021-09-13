@@ -3,8 +3,7 @@ import fetch, { Response } from 'node-fetch';
 import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
 
 import {
-  BambooHREmployeeDetails,
-  BambooHREmployeesMap,
+  BambooHREmployee,
   BambooHRFile,
   BambooHRFilesResponse,
   BambooHRUser,
@@ -103,23 +102,36 @@ export class APIClient {
     for (const user of users) {
       await iteratee({
         ...user,
-        employeeDetails: employees[user.employeeId] || {},
+        employeeDetails: employees.get(user.employeeId.toString()) || {},
       });
     }
   }
 
-  private async fetchEmployeeDirectory(): Promise<BambooHREmployeesMap> {
+  public async iterateEmployees(
+    iteratee: ResourceIteratee<BambooHREmployee>,
+  ): Promise<void> {
+    const employees = await this.fetchEmployeeDirectory();
+    for (const employee of employees.values()) {
+      await iteratee(employee);
+    }
+  }
+
+  private async fetchEmployeeDirectory(): Promise<
+    Map<string, BambooHREmployee>
+  > {
     const employeesResponse = await this.request(
       this.withBaseUri('v1/employees/directory'),
     );
     const employeesObject = await employeesResponse.json();
-    return employeesObject.employees.reduce(
-      (acc: BambooHREmployeesMap, cur: BambooHREmployeeDetails) => {
-        acc[cur.id] = cur;
-        return acc;
-      },
-      {} as BambooHREmployeesMap,
-    );
+    const employeeMap: Map<string, BambooHREmployee> = new Map();
+
+    for (const employee of employeesObject.employees as Array<
+      BambooHREmployee
+    >) {
+      employeeMap.set(employee.id, employee);
+    }
+
+    return employeeMap;
   }
 
   /**
@@ -170,8 +182,4 @@ export class APIClient {
       }
     }
   }
-}
-
-export function createAPIClient(config: IntegrationConfig): APIClient {
-  return new APIClient(config);
 }

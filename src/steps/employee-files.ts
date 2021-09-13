@@ -6,7 +6,7 @@ import {
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
-import { createAPIClient } from '../client';
+import { APIClient } from '../client';
 import { entities, relationships } from '../constants';
 import { IntegrationConfig } from '../types';
 
@@ -18,7 +18,7 @@ export async function fetchEmployeeFiles({
   instance,
   jobState,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = createAPIClient(instance.config);
+  const apiClient = new APIClient(instance.config);
 
   await jobState.iterateEntities(
     { _type: entities.USER._type },

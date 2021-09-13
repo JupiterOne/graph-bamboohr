@@ -1,8 +1,6 @@
 import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
-import {
-  createMockExecutionContext,
-  setupRecording,
-} from '@jupiterone/integration-sdk-testing';
+import { createMockExecutionContext } from '@jupiterone/integration-sdk-testing';
+import { setupBambooHRRecording } from '../test/recording';
 
 import { IntegrationConfig } from './types';
 import validateInvocation from './validateInvocation';
@@ -30,7 +28,7 @@ it('requires a valid namespace', async () => {
 });
 
 it('auth error', async () => {
-  const recording = setupRecording({
+  const recording = setupBambooHRRecording({
     directory: '__recordings__',
     name: 'client-auth-error',
   });

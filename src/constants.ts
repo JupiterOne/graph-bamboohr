@@ -6,7 +6,7 @@ import {
 
 export const ACCOUNT_ENTITY_DATA_KEY = 'entity:account';
 
-type EntityConstantKeys = 'ACCOUNT' | 'COMPANY' | 'USER' | 'FILE';
+type EntityConstantKeys = 'ACCOUNT' | 'COMPANY' | 'USER' | 'EMPLOYEE' | 'FILE';
 
 export const entities: Record<EntityConstantKeys, StepEntityMetadata> = {
   ACCOUNT: {
@@ -24,6 +24,11 @@ export const entities: Record<EntityConstantKeys, StepEntityMetadata> = {
     _type: 'bamboohr_user',
     _class: 'User',
   },
+  EMPLOYEE: {
+    resourceName: 'Employee',
+    _type: 'bamboohr_employee',
+    _class: 'Record',
+  },
   FILE: {
     resourceName: 'File',
     _type: 'bamboohr_file',
@@ -32,14 +37,22 @@ export const entities: Record<EntityConstantKeys, StepEntityMetadata> = {
 };
 
 type RelationshipConstantKeys =
+  | 'ACCOUNT_HAS_EMPLOYEE'
   | 'ACCOUNT_HAS_USER'
   | 'ACCOUNT_HAS_FILE'
+  | 'USER_IS_EMPLOYEE'
   | 'USER_HAS_FILE';
 
 export const relationships: Record<
   RelationshipConstantKeys,
   StepRelationshipMetadata
 > = {
+  ACCOUNT_HAS_EMPLOYEE: {
+    _type: 'bamboohr_account_has_employee',
+    _class: RelationshipClass.HAS,
+    sourceType: entities.ACCOUNT._type,
+    targetType: entities.EMPLOYEE._type,
+  },
   ACCOUNT_HAS_USER: {
     _type: 'bamboohr_account_has_user',
     _class: RelationshipClass.HAS,
@@ -51,6 +64,12 @@ export const relationships: Record<
     _class: RelationshipClass.HAS,
     sourceType: entities.ACCOUNT._type,
     targetType: entities.FILE._type,
+  },
+  USER_IS_EMPLOYEE: {
+    _type: 'bamboohr_user_is_employee',
+    _class: RelationshipClass.IS,
+    sourceType: entities.USER._type,
+    targetType: entities.EMPLOYEE._type,
   },
   USER_HAS_FILE: {
     _type: 'bamboohr_user_has_file',

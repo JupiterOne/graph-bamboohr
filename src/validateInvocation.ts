@@ -3,7 +3,7 @@ import {
   IntegrationValidationError,
 } from '@jupiterone/integration-sdk-core';
 
-import { createAPIClient, normalizeClientNamespace } from './client';
+import { APIClient, normalizeClientNamespace } from './client';
 import { IntegrationConfig } from './types';
 
 export default async function validateInvocation(
@@ -23,6 +23,6 @@ export default async function validateInvocation(
     );
   }
 
-  const apiClient = createAPIClient(config);
+  const apiClient = new APIClient(config);
   await apiClient.verifyAuthentication();
 }

@@ -4,6 +4,7 @@ import {
   Entity,
   IntegrationStep,
   IntegrationStepExecutionContext,
+  parseTimePropertyValue,
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
@@ -94,9 +95,16 @@ export async function fetchEmployees({
   )) as Entity;
 
   await apiClient.iterateEmployees(async (employee) => {
+    const { hireDate, terminationDate } = await apiClient.getEmployeeDetails(
+      employee.id,
+    );
     const employeeEntity = createIntegrationEntity({
       entityData: {
-        source: employee,
+        source: {
+          ...employee,
+          hireDate,
+          terminationDate,
+        },
         assign: {
           _key: getEmployeeKey(employee.id),
           _type: entities.EMPLOYEE._type,
@@ -117,6 +125,8 @@ export async function fetchEmployees({
           mobilePhone: employee.mobilePhone,
           workPhone: employee.workPhone,
           supervisor: employee.supervisor,
+          hireDate: parseTimePropertyValue(hireDate),
+          terminationDate: parseTimePropertyValue(terminationDate),
           category: 'hr',
         },
       },

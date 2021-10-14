@@ -8,6 +8,17 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.5.0 - 2021-10-14
+
+### Added
+
+- New properties added to resources:
+
+  | Entity              | Properties        |
+  | ------------------- | ----------------- |
+  | `bamboohr_employee` | `hireDate`        |
+  | `bamboohr_employee` | `terminationDate` |
+
 ## 0.4.0 - 2021-08-13
 
 ### Added

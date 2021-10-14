@@ -7,6 +7,7 @@ import {
   BambooHRFile,
   BambooHRFilesResponse,
   BambooHRUser,
+  EmployeeDetails,
   IntegrationConfig,
   StatusError,
 } from './types';
@@ -132,6 +133,29 @@ export class APIClient {
     }
 
     return employeeMap;
+  }
+
+  /**
+   * Gets additional employee data as necessary. Currently we just need
+   * terminationDate and hireDate, but we can/should extend this whenever
+   * we are in need of another property.
+   *
+   * @param employeeId employee's id
+   */
+  public async getEmployeeDetails(
+    employeeId: string,
+  ): Promise<EmployeeDetails> {
+    const response = await this.request(
+      this.withBaseUri(
+        `v1/employees/${employeeId}/?fields=terminationDate,hireDate`,
+      ),
+    );
+    const details = await response.json();
+
+    return {
+      hireDate: details.hireDate,
+      terminationDate: details.terminationDate,
+    };
   }
 
   /**

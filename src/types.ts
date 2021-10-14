@@ -30,6 +30,11 @@ export class StatusError extends Error {
   }
 }
 
+export type EmployeeDetails = {
+  terminationDate: string;
+  hireDate: string;
+};
+
 export type BambooHREmployee = {
   id: string;
   displayName: string;

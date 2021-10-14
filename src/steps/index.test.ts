@@ -118,6 +118,12 @@ describe('BambooHR', () => {
           supervisor: {
             type: 'string',
           },
+          hireDate: {
+            type: 'number',
+          },
+          terminationDate: {
+            type: 'number',
+          },
         },
         required: [],
       },

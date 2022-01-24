@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Updated to latest `@jupiterone/sdk` package versions
+
 ## 0.5.0 - 2021-10-14
 
 ### Added

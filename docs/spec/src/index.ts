@@ -1,6 +1,6 @@
 import { IntegrationConfig } from '../../../src/types';
-import { accountSpec } from './account';
 import { accessSpec } from './access';
+import { accountSpec } from './account';
 import { companyFilesSpec } from './company-files';
 import { employeeFilesSpec } from './employee-files';
 import { IntegrationSpecConfig } from './types';

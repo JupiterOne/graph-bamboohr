@@ -108,6 +108,11 @@ export class APIClient {
     }
   }
 
+  /**
+   * Iterates each employee resource in the provider.
+   *
+   * @param iteratee receives each resource to produce entities/relationships
+   */
   public async iterateEmployees(
     iteratee: ResourceIteratee<BambooHREmployee>,
   ): Promise<void> {

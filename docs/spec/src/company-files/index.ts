@@ -4,6 +4,10 @@ import { StepSpec } from '../types';
 
 export const companyFilesSpec: StepSpec<IntegrationConfig>[] = [
   {
+    /**
+     * ENDPOINT: https://api.bamboohr.com/api/gateway.php/jupiteronepartneraccount/v1/files/view
+     * PATTERN: Fetch Entities
+     */
     id: 'fetch-company-files',
     name: 'Fetch Company Files',
     entities: [

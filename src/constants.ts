@@ -6,18 +6,13 @@ import {
 
 export const ACCOUNT_ENTITY_DATA_KEY = 'entity:account';
 
-type EntityConstantKeys = 'ACCOUNT' | 'COMPANY' | 'USER' | 'EMPLOYEE' | 'FILE';
+type EntityConstantKeys = 'ACCOUNT' | 'USER' | 'EMPLOYEE' | 'FILE';
 
 export const entities: Record<EntityConstantKeys, StepEntityMetadata> = {
   ACCOUNT: {
     resourceName: 'Account',
     _type: 'bamboohr_account',
     _class: 'Account',
-  },
-  COMPANY: {
-    resourceName: 'Company',
-    _type: 'bamboohr_company',
-    _class: 'Organization',
   },
   USER: {
     resourceName: 'User',
@@ -40,8 +35,8 @@ type RelationshipConstantKeys =
   | 'ACCOUNT_HAS_EMPLOYEE'
   | 'ACCOUNT_HAS_USER'
   | 'ACCOUNT_HAS_FILE'
-  | 'USER_IS_EMPLOYEE'
-  | 'USER_HAS_FILE';
+  | 'USER_HAS_FILE'
+  | 'USER_IS_EMPLOYEE';
 
 export const relationships: Record<
   RelationshipConstantKeys,
@@ -65,16 +60,16 @@ export const relationships: Record<
     sourceType: entities.ACCOUNT._type,
     targetType: entities.FILE._type,
   },
-  USER_IS_EMPLOYEE: {
-    _type: 'bamboohr_user_is_employee',
-    _class: RelationshipClass.IS,
-    sourceType: entities.USER._type,
-    targetType: entities.EMPLOYEE._type,
-  },
   USER_HAS_FILE: {
     _type: 'bamboohr_user_has_file',
     _class: RelationshipClass.HAS,
     sourceType: entities.USER._type,
     targetType: entities.FILE._type,
+  },
+  USER_IS_EMPLOYEE: {
+    _type: 'bamboohr_user_is_employee',
+    _class: RelationshipClass.IS,
+    sourceType: entities.USER._type,
+    targetType: entities.EMPLOYEE._type,
   },
 };

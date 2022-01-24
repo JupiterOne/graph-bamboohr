@@ -4,6 +4,10 @@ import { StepSpec } from '../types';
 
 export const accessSpec: StepSpec<IntegrationConfig>[] = [
   {
+    /**
+     * ENDPOINT: https://api.bamboohr.com/api/gateway.php/jupiteronepartneraccount/v1/employees/directory
+     * PATTERN: Fetch Entities
+     */
     id: 'fetch-employees',
     name: 'Fetch Employees',
     entities: [
@@ -25,6 +29,10 @@ export const accessSpec: StepSpec<IntegrationConfig>[] = [
     implemented: true,
   },
   {
+    /**
+     * ENDPOINT: https://api.bamboohr.com/api/gateway.php/jupiteronepartneraccount/v1/meta/users
+     * PATTERN: Fetch Entities + Build Child Relationships (maybe because of the user IS employee relationship?)
+     */
     id: 'fetch-users',
     name: 'Fetch Users',
     entities: [

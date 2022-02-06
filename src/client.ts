@@ -1,13 +1,18 @@
-import fetch, { Response } from 'node-fetch';
-
-import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
+import fetch, { RequestInit, Response } from 'node-fetch';
+import url from 'url';
 
 import {
+  IntegrationProviderAPIError,
+  IntegrationProviderAuthenticationError,
+} from '@jupiterone/integration-sdk-core';
+
+import {
+  BAMBOOHR_EMPLOYEE_FIELDS,
   BambooHREmployee,
+  BambooHREmployeeReport,
   BambooHRFile,
   BambooHRFilesResponse,
   BambooHRUser,
-  EmployeeDetails,
   IntegrationConfig,
   StatusError,
 } from './types';
@@ -44,27 +49,56 @@ export class APIClient {
     return `https://api.bamboohr.com/api/gateway.php/${this.clientNamespace}/${path}`;
   }
 
-  private async request(
-    uri: string,
-    method: 'GET' | 'HEAD' = 'GET',
-  ): Promise<Response> {
-    return await fetch(uri, {
+  private async request({
+    path,
+    method = 'GET',
+    headers = {},
+    search = {},
+    body,
+  }: {
+    path: string;
+    method?: 'GET' | 'POST';
+    headers?: Record<string, string>;
+    search?: Record<string, string | readonly string[]>;
+    body?: RequestInit['body'];
+  }): Promise<Response> {
+    const requestUrl = new url.URL(this.withBaseUri(path));
+    const searchParams = new url.URLSearchParams(search);
+    if (requestUrl.search && searchParams.toString()) {
+      for (const [key, value] of requestUrl.searchParams.entries()) {
+        searchParams.append(key, value);
+      }
+    }
+    requestUrl.search = searchParams.toString();
+
+    const response = await fetch(requestUrl, {
       method,
       headers: {
+        ...headers,
         Accept: 'application/json',
         Authorization: `Basic ${Buffer.from(
           this.clientAccessToken + ':x',
         ).toString('base64')}`,
       },
+      body,
     });
+
+    if (!response.ok) {
+      throw new IntegrationProviderAPIError({
+        endpoint: requestUrl.toString(),
+        status: response.status,
+        statusText: response.statusText,
+      });
+    }
+
+    return response;
   }
 
   public async verifyAuthentication(): Promise<void> {
     try {
-      const response = await this.request(
-        this.withBaseUri('v1/employees/0'),
-        'GET',
-      );
+      const response = await this.request({
+        path: 'v1/employees/0',
+      });
 
       // A 200 is expected when authentication works and the employee exists A
       // 404 is expected when authentication works and the employee does not
@@ -95,16 +129,14 @@ export class APIClient {
   public async iterateUsers(
     iteratee: ResourceIteratee<BambooHRUser>,
   ): Promise<void> {
-    const usersResponse = await this.request(this.withBaseUri('v1/meta/users'));
+    const usersResponse = await this.request({
+      path: 'v1/meta/users',
+    });
     const usersObject = await usersResponse.json();
     const users: BambooHRUser[] = Object.values(usersObject);
-    const employees = await this.fetchEmployeeDirectory();
 
     for (const user of users) {
-      await iteratee({
-        ...user,
-        employeeDetails: employees.get(user.employeeId.toString()) || {},
-      });
+      await iteratee(user);
     }
   }
 
@@ -116,51 +148,27 @@ export class APIClient {
   public async iterateEmployees(
     iteratee: ResourceIteratee<BambooHREmployee>,
   ): Promise<void> {
-    const employees = await this.fetchEmployeeDirectory();
-    for (const employee of employees.values()) {
+    const employeesResponse = await this.request({
+      path: 'v1/reports/custom',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      search: {
+        format: 'json',
+        onlyCurrent: 'false',
+      },
+      body: JSON.stringify({
+        title: 'Employee Report for JupiterOne',
+        filters: {},
+        fields: BAMBOOHR_EMPLOYEE_FIELDS,
+      }),
+    });
+
+    const report: BambooHREmployeeReport = await employeesResponse.json();
+    for (const employee of report.employees.values()) {
       await iteratee(employee);
     }
-  }
-
-  private async fetchEmployeeDirectory(): Promise<
-    Map<string, BambooHREmployee>
-  > {
-    const employeesResponse = await this.request(
-      this.withBaseUri('v1/employees/directory'),
-    );
-    const employeesObject = await employeesResponse.json();
-    const employeeMap: Map<string, BambooHREmployee> = new Map();
-
-    for (const employee of employeesObject.employees as Array<
-      BambooHREmployee
-    >) {
-      employeeMap.set(employee.id, employee);
-    }
-
-    return employeeMap;
-  }
-
-  /**
-   * Gets additional employee data as necessary. Currently we just need
-   * terminationDate and hireDate, but we can/should extend this whenever
-   * we are in need of another property.
-   *
-   * @param employeeId employee's id
-   */
-  public async getEmployeeDetails(
-    employeeId: string,
-  ): Promise<EmployeeDetails> {
-    const response = await this.request(
-      this.withBaseUri(
-        `v1/employees/${employeeId}/?fields=terminationDate,hireDate`,
-      ),
-    );
-    const details = await response.json();
-
-    return {
-      hireDate: details.hireDate,
-      terminationDate: details.terminationDate,
-    };
   }
 
   /**
@@ -172,20 +180,18 @@ export class APIClient {
     employeeId: string,
     iteratee: ResourceIteratee<BambooHRFile>,
   ): Promise<void> {
-    const response = await this.request(
-      this.withBaseUri(`v1/employees/${employeeId}/files/view`),
+    const response = await this.request({
+      path: `v1/employees/${employeeId}/files/view`,
+    });
+
+    const files: BambooHRFilesResponse = await response.json();
+    const categoryFiles = files.categories.reduce(
+      (acc, category) => acc.concat(category.files),
+      [] as BambooHRFile[],
     );
 
-    if (response.ok) {
-      const files: BambooHRFilesResponse = await response.json();
-      const categoryFiles = files.categories.reduce(
-        (acc, category) => acc.concat(category.files),
-        [] as BambooHRFile[],
-      );
-
-      for (const file of categoryFiles) {
-        await iteratee(file);
-      }
+    for (const file of categoryFiles) {
+      await iteratee(file);
     }
   }
 
@@ -197,18 +203,18 @@ export class APIClient {
   public async iterateCompanyFiles(
     iteratee: ResourceIteratee<BambooHRFile>,
   ): Promise<void> {
-    const response = await this.request(this.withBaseUri(`v1/files/view`));
+    const response = await this.request({
+      path: `v1/files/view`,
+    });
 
-    if (response.ok) {
-      const files: BambooHRFilesResponse = await response.json();
-      const categoryFiles = files.categories.reduce(
-        (acc, category) => acc.concat(category.files),
-        [] as BambooHRFile[],
-      );
+    const files: BambooHRFilesResponse = await response.json();
+    const categoryFiles = files.categories.reduce(
+      (acc, category) => acc.concat(category.files),
+      [] as BambooHRFile[],
+    );
 
-      for (const file of categoryFiles) {
-        await iteratee(file);
-      }
+    for (const file of categoryFiles) {
+      await iteratee(file);
     }
   }
 }

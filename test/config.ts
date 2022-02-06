@@ -9,6 +9,6 @@ if (process.env.LOAD_ENV) {
 }
 
 export const integrationConfig: IntegrationConfig = {
-  clientNamespace: process.env.CLIENT_NAMESPACE || 'jupiteronepartneraccount',
+  clientNamespace: process.env.CLIENT_NAMESPACE || 'domekipper',
   clientAccessToken: process.env.CLIENT_ACCESS_TOKEN || 'client_access_token',
 };

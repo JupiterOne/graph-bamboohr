@@ -10,8 +10,8 @@
 
 ## How it Works
 
-- JupiterOne periodically fetches users and files from BambooHR to update the
-  graph.
+- JupiterOne periodically fetches employees, users, and files from BambooHR to
+  update the graph.
 - Additional details stored in BambooHR users is used to map your organization
   management structure.
 - Write JupiterOne queries to review and monitor updates to the graph.
@@ -30,7 +30,7 @@ Important notes:
 - BambooHR employee records have an "Employee #" that is assigned when the
   employee is created and which may later be modified. There is also a permanent
   record "id" property that does not change and very likely is not equal to the
-  Employee #. The "Employee #" is not returned in employee list API and is
+  Employee #. The Employee # is not returned in the employee list API and is
   therefore not stored in the graph data.
 
 ## Requirements

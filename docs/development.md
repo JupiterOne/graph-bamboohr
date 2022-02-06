@@ -4,8 +4,7 @@ This integration focuses on [BambooHR](https://www.bamboohr.com/) and is using
 [BambooHR REST API](https://documentation.bamboohr.com/reference) for
 interacting with the BambooHR platform.
 
-The
-[BambooHR's Getting Started](https://documentation.bamboohr.com/docs/getting-started)
+[BambooHR Getting Started](https://documentation.bamboohr.com/docs/getting-started)
 section can also be useful.
 
 ## Provider account setup
@@ -60,3 +59,50 @@ After following the above steps, you should now be able to start contributing to
 this integration. The integration will pull in the `CLIENT_ACCESS_TOKEN` and
 `CLIENT_NAMESPACE` variables from the `.env` file and use them when making
 requests.
+
+## Testing API Calls
+
+```sh
+export BAMBOOHR_DOMAIN=domekipper
+export BAMBOOHR_API_KEY=1a786...
+export BAMBOOHR_EMPLOYEE_ID=61
+export BAMBOOHR_EMPLOYEE_REPORT_PATH=/tmp/employee-report.json
+
+cat > $BAMBOOHR_EMPLOYEE_REPORT_PATH<< EOF
+{
+    "title": "Employee Report for JupiterOne",
+    "filters": {},
+    "fields": [
+      "displayName",
+      "firstName",
+      "lastName",
+      "preferredName",
+      "jobTitle",
+      "workPhone",
+      "mobilePhone",
+      "workEmail",
+      "department",
+      "location",
+      "division",
+      "linkedIn",
+      "instagram",
+      "pronouns",
+      "workPhoneExtension",
+      "supervisor",
+      "photoUploaded",
+      "photoUrl",
+      "canUploadPhoto",
+      "employmentHistoryStatus",
+      "terminationDate",
+      "hireDate"
+    ]
+}
+EOF
+```
+
+```sh
+curl -i -u "${BAMBOOHR_API_KEY}:x" "https://api.bamboohr.com/api/gateway.php/${BAMBOOHR_DOMAIN}/v1/employees/directory"
+curl -i -u "${BAMBOOHR_API_KEY}:x" "https://api.bamboohr.com/api/gateway.php/${BAMBOOHR_DOMAIN}/v1/employees/${BAMBOOHR_EMPLOYEE_ID}/?fields=status"
+curl -i -u "${BAMBOOHR_API_KEY}:x" "https://api.bamboohr.com/api/gateway.php/${BAMBOOHR_DOMAIN}/v1/meta/fields/"
+curl -i -u "${BAMBOOHR_API_KEY}:x" -H "Content-Type: application/json" --data "@${BAMBOOHR_EMPLOYEE_REPORT_PATH}" "https://api.bamboohr.com/api/gateway.php/${BAMBOOHR_DOMAIN}/v1/reports/custom?format=json&onlyCurrent=false"
+```

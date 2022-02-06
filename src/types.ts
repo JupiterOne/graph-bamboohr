@@ -30,43 +30,74 @@ export class StatusError extends Error {
   }
 }
 
-export type EmployeeDetails = {
-  terminationDate: string;
-  hireDate: string;
+export const BAMBOOHR_EMPLOYEE_FIELDS = [
+  'displayName',
+  'firstName',
+  'lastName',
+  'preferredName',
+  'gender',
+  'jobTitle',
+  'workPhone',
+  'mobilePhone',
+  'workEmail',
+  'department',
+  'location',
+  'division',
+  'linkedIn',
+  'instagram',
+  'pronouns',
+  'workPhoneExtension',
+  'supervisor',
+  'photoUploaded',
+  'photoUrl',
+  'status',
+  'employmentHistoryStatus',
+  'terminationDate',
+  'hireDate',
+] as const;
+
+type BambooHREmployeeFetchedFields = {
+  [K in Exclude<
+    typeof BAMBOOHR_EMPLOYEE_FIELDS[number],
+    'photoUploaded' | 'status'
+  >]: string | undefined;
 };
 
-export type BambooHREmployee = {
+export type BambooHREmployee = BambooHREmployeeFetchedFields & {
   id: string;
-  displayName: string;
-  firstName: string;
-  lastName: string;
-  preferredName?: string;
-  gender: string;
-  jobTitle?: string;
-  workPhone?: string;
-  supervisor: string;
-  mobilePhone?: string;
-  workEmail?: string;
-  department: string;
-  location: string;
-  division?: string;
-  linkedIn: string;
-  workPhoneExtension: string;
   photoUploaded: boolean;
-  photoUrl: string;
-  canUploadPhoto: number;
+  status: 'Active' | 'Inactive' | string;
+};
+
+export type BambooHREmployeeReport = {
+  title: string;
+  fields: { id: string; type: string; name: string }[];
+  employees: BambooHREmployee[];
 };
 
 export type BambooHRUser = {
+  /**
+   * The user
+   */
   id: number;
-  employeeId: number;
+
+  /**
+   * The "employeeId" attribute will only be set if the user record is linked to
+   * an employee record.
+   */
+  employeeId?: number;
+
   firstName: string;
   lastName: string;
   email: string;
   status: 'enabled' | string;
+
+  /**
+   * The last login date/time is formatted according to ISO 8601.
+   */
   lastLogin: string;
+
   uri: string;
-  employeeDetails?: Partial<BambooHREmployee>;
 };
 
 export type BambooHRFile = {

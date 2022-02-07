@@ -8,9 +8,26 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Added
+
+- New properties added to resources:
+
+  | Entity              | Properties                                                   |
+  | ------------------- | ------------------------------------------------------------ |
+  | `bamboohr_employee` | `active: boolean`                                            |
+  | `bamboohr_employee` | `status: "Active", "Inactive"`                               |
+  | `bamboohr_employee` | `employmentHistoryStatus: "Contractor", "Full-Time", string` |
+  | `bamboohr_employee` | `employeeNumber: string`                                     |
+
 ### Changed
 
 - Updated to latest `@jupiterone/sdk` package versions
+- Moved from `/directory` to `/reports/custom` API for employee data to include
+  all active and inactive employees and avoid N+1 API calls for employee
+  details. This is the recommended API in the BambooHR documentation.
+- Removed an additional call to the `/directory` API when fetching users. This
+  was used to get details about users from employee records which is no longer
+  necessary thanks to using the custom report output.
 
 ## 0.5.0 - 2021-10-14
 

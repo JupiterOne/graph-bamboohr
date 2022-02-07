@@ -1,7 +1,10 @@
 import {
+  convertProperties,
   createDirectRelationship,
   createIntegrationEntity,
   Entity,
+  getRawData,
+  IntegrationError,
   IntegrationStep,
   IntegrationStepExecutionContext,
   parseTimePropertyValue,
@@ -10,7 +13,16 @@ import {
 
 import { APIClient } from '../client';
 import { ACCOUNT_ENTITY_DATA_KEY, entities, relationships } from '../constants';
-import { IntegrationConfig } from '../types';
+import { BambooHREmployee, BambooHRUser, IntegrationConfig } from '../types';
+
+async function getEmployeeEntity(
+  jobState,
+  user: BambooHRUser,
+): Promise<Entity | undefined> {
+  if (user.employeeId) {
+    return await jobState.findEntity(getEmployeeKey(user.employeeId));
+  }
+}
 
 export function getUserKey(id: number): string {
   return `bamboohr_user:${id}`;
@@ -31,6 +43,21 @@ export async function fetchUsers({
   )) as Entity;
 
   await apiClient.iterateUsers(async (user) => {
+    const employeeEntity = await getEmployeeEntity(jobState, user);
+    const employee = employeeEntity
+      ? <BambooHREmployee>getRawData(employeeEntity)
+      : undefined;
+
+    if (employeeEntity && !employee) {
+      throw new IntegrationError({
+        code: 'MISSING_ENTITY_RAW_DATA',
+        message: 'Expected employee entity to have raw data!',
+      });
+    }
+
+    const displayName =
+      employee?.displayName || `${user.firstName} ${user.lastName}`;
+
     const userEntity = createIntegrationEntity({
       entityData: {
         source: user,
@@ -38,24 +65,24 @@ export async function fetchUsers({
           _key: getUserKey(user.id),
           _type: entities.USER._type,
           _class: entities.USER._class,
-          id: `${user.id}`,
+          id: String(user.id),
           active: user.status === 'enabled',
           webLink: `https://${instance.config.clientNamespace}.bamboohr.com/employees/employee.php?id=${user.employeeId}`,
-          employeeId: `${user.employeeId}`,
-          displayName: `${user.firstName} ${user.lastName}`,
-          name: `${user.firstName} ${user.lastName}`,
+          displayName: displayName,
+          name: displayName,
+          employeeId: String(user.employeeId),
           username: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          location: user.employeeDetails?.location,
-          jobTitle: user.employeeDetails?.jobTitle,
-          workEmail: user.employeeDetails?.workEmail,
-          department: user.employeeDetails?.department,
-          division: user.employeeDetails?.division,
-          mobilePhone: user.employeeDetails?.mobilePhone,
-          workPhone: user.employeeDetails?.workPhone,
-          supervisor: user.employeeDetails?.supervisor,
+          location: employee?.location,
+          jobTitle: employee?.jobTitle,
+          workEmail: employee?.workEmail,
+          department: employee?.department,
+          division: employee?.division,
+          mobilePhone: employee?.mobilePhone,
+          workPhone: employee?.workPhone,
+          supervisor: employee?.supervisor,
         },
       },
     });
@@ -69,9 +96,6 @@ export async function fetchUsers({
       }),
     );
 
-    const employeeEntity = await jobState.findEntity(
-      getEmployeeKey(user.employeeId),
-    );
     if (employeeEntity) {
       await jobState.addRelationship(
         createDirectRelationship({
@@ -95,38 +119,21 @@ export async function fetchEmployees({
   )) as Entity;
 
   await apiClient.iterateEmployees(async (employee) => {
-    const { hireDate, terminationDate } = await apiClient.getEmployeeDetails(
-      employee.id,
-    );
     const employeeEntity = createIntegrationEntity({
       entityData: {
-        source: {
-          ...employee,
-          hireDate,
-          terminationDate,
-        },
+        source: employee,
         assign: {
           _key: getEmployeeKey(employee.id),
           _type: entities.EMPLOYEE._type,
           _class: entities.EMPLOYEE._class,
-          id: employee.id,
+          ...convertProperties(employee),
           webLink: `https://${instance.config.clientNamespace}.bamboohr.com/employees/employee.php?id=${employee.id}`,
-          displayName: `${employee.firstName} ${employee.lastName}`,
-          name: `${employee.firstName} ${employee.lastName}`,
+          name: employee.displayName,
           username: employee.workEmail,
-          firstName: employee.firstName,
-          lastName: employee.lastName,
           email: employee.workEmail,
-          location: employee.location,
-          jobTitle: employee.jobTitle,
-          workEmail: employee.workEmail,
-          department: employee.department,
-          division: employee.division,
-          mobilePhone: employee.mobilePhone,
-          workPhone: employee.workPhone,
-          supervisor: employee.supervisor,
-          hireDate: parseTimePropertyValue(hireDate),
-          terminationDate: parseTimePropertyValue(terminationDate),
+          active: employee.status === 'Active',
+          hireDate: parseTimePropertyValue(employee.hireDate),
+          terminationDate: parseTimePropertyValue(employee.terminationDate),
           category: 'hr',
         },
       },

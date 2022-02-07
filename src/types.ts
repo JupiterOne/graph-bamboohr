@@ -51,6 +51,7 @@ export const BAMBOOHR_EMPLOYEE_FIELDS = [
   'photoUploaded',
   'photoUrl',
   'status',
+  'employeeNumber',
   'employmentHistoryStatus',
   'terminationDate',
   'hireDate',

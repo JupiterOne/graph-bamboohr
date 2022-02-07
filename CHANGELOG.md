@@ -17,6 +17,7 @@ and this project adheres to
   | `bamboohr_employee` | `active: boolean`                                            |
   | `bamboohr_employee` | `status: "Active", "Inactive"`                               |
   | `bamboohr_employee` | `employmentHistoryStatus: "Contractor", "Full-Time", string` |
+  | `bamboohr_employee` | `employeeNumber: string`                                     |
 
 ### Changed
 

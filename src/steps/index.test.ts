@@ -43,15 +43,6 @@ describe('BambooHR', () => {
     await fetchCompanyFiles(context);
     await fetchEmployeeFiles(context);
 
-    // Review snapshot, failure is a regression
-    // expect({
-    //   numCollectedEntities: context.jobState.collectedEntities.length,
-    //   numCollectedRelationships: context.jobState.collectedRelationships.length,
-    //   collectedEntities: context.jobState.collectedEntities,
-    //   collectedRelationships: context.jobState.collectedRelationships,
-    //   encounteredTypes: context.jobState.encounteredTypes,
-    // }).toMatchSnapshot();
-
     const accounts = context.jobState.collectedEntities.filter((e) =>
       e._class.includes('Account'),
     );
@@ -125,6 +116,9 @@ describe('BambooHR', () => {
             type: 'string',
           },
           supervisor: {
+            type: 'string',
+          },
+          employeeNumber: {
             type: 'string',
           },
           hireDate: {

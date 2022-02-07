@@ -8,7 +8,9 @@ and this project adheres to
 
 ## [Unreleased]
 
-## Added
+## 0.6.0 - 2022-02-07
+
+### Added
 
 - New properties added to resources:
 

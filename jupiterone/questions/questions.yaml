@@ -1,0 +1,24 @@
+---
+sourceId: managed:bamboohr
+integrationDefinitionId: "${integration_definition_id}"
+questions:
+  - id: integration-question-bamboohr-user-not-employee
+    title: Which of my BambooHR users are not BambooHR employees?
+    description:
+      Returns all BambooHR users who are not BambooHR employees.
+    queries:
+      - query: FIND bamboohr_user THAT !IS bamboohr_employee
+    tags:
+      - bamboohr
+      - hr
+      - access
+  - id: integration-question-bamboohr-person-not-employee
+    title: Which Person entities are not BambooHR employees?
+    description:
+      Returns all Person entities that are not BambooHR employees
+    queries:
+      - query: FIND Person WITH _type="employee" THAT !RELATES TO bamboohr_employee
+    tags:
+      - bamboohr
+      - hr
+      - access

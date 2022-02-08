@@ -8,6 +8,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.7.0 - 2022-02-07
+
+### Changed
+
+- Moved questions file into graph project
+
+### Fixed
+
+- Fixed NPM package build
+
 ## 0.6.0 - 2022-02-07
 
 ### Added

@@ -180,18 +180,26 @@ export class APIClient {
     employeeId: string,
     iteratee: ResourceIteratee<BambooHRFile>,
   ): Promise<void> {
-    const response = await this.request({
-      path: `v1/employees/${employeeId}/files/view`,
-    });
+    try {
+      const response = await this.request({
+        path: `v1/employees/${employeeId}/files/view`,
+      });
 
-    const files: BambooHRFilesResponse = await response.json();
-    const categoryFiles = files.categories.reduce(
-      (acc, category) => acc.concat(category.files),
-      [] as BambooHRFile[],
-    );
+      const files: BambooHRFilesResponse = await response.json();
+      const categoryFiles = files.categories.reduce(
+        (acc, category) => acc.concat(category.files),
+        [] as BambooHRFile[],
+      );
 
-    for (const file of categoryFiles) {
-      await iteratee(file);
+      for (const file of categoryFiles) {
+        await iteratee(file);
+      }
+    } catch (err) {
+      // if no files are found for the employee the endpoint will return 404.
+      // https://documentation.bamboohr.com/reference/list-employee-files-1
+      if (err.status !== 404) {
+        throw err;
+      }
     }
   }
 

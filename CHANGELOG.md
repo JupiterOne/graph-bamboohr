@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.7.1 - 2022-02-10
+
+### Fixed
+
+- Fixed unhandled `404 Not Found` response error that terminated the employee
+  files step.
+
 ## 0.7.0 - 2022-02-07
 
 ### Changed

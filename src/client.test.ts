@@ -1,3 +1,4 @@
+import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
 import { Recording } from '@jupiterone/integration-sdk-testing';
 
 import { integrationConfig } from '../test/config';
@@ -25,6 +26,50 @@ describe('client APIs', () => {
 
   afterEach(async () => {
     if (recording) await recording.stop();
+  });
+
+  test('verifyAuthentication valid credentials', async () => {
+    recording = setupBambooHRRecording({
+      directory: __dirname,
+      name: 'verifyAuthentication',
+      options: {
+        recordFailedRequests: true,
+      },
+    });
+
+    const client = new APIClient(integrationConfig);
+    await expect(client.verifyAuthentication()).resolves.toBeUndefined();
+  });
+
+  test('verifyAuthentication employee not found', async () => {
+    recording = setupBambooHRRecording({
+      directory: __dirname,
+      name: 'verifyAuthenticationNotFound',
+      options: {
+        recordFailedRequests: true,
+      },
+    });
+
+    const client = new APIClient(integrationConfig);
+    await expect(client.verifyAuthentication(182372)).resolves.toBeUndefined();
+  });
+
+  test('verifyAuthentication invalid credentials', async () => {
+    recording = setupBambooHRRecording({
+      directory: __dirname,
+      name: 'verifyAuthenticationInvalid',
+      options: {
+        recordFailedRequests: true,
+      },
+    });
+
+    const client = new APIClient({
+      ...integrationConfig,
+      clientAccessToken: 'invalid-test-token',
+    });
+    await expect(client.verifyAuthentication()).rejects.toThrowError(
+      IntegrationProviderAuthenticationError,
+    );
   });
 
   test('iterateEmployees', async () => {

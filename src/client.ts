@@ -14,7 +14,6 @@ import {
   BambooHRFilesResponse,
   BambooHRUser,
   IntegrationConfig,
-  StatusError,
 } from './types';
 
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
@@ -49,6 +48,11 @@ export class APIClient {
     return `https://api.bamboohr.com/api/gateway.php/${this.clientNamespace}/${path}`;
   }
 
+  /**
+   * Make a request to the BambooHR API.
+   *
+   * @throws IntegrationProviderAPIError when status is not OK.
+   */
   private async request({
     path,
     method = 'GET',
@@ -94,30 +98,33 @@ export class APIClient {
     return response;
   }
 
-  public async verifyAuthentication(): Promise<void> {
+  /**
+   * Verify credentials authenticate with the provider API.
+   *
+   * Uses `v1/employees/0`, an endpoint that is expected to be cheap to call
+   * which also requires authentication.
+   *
+   * - A `200` response is expected when authentication works and the employee
+   *   exists.
+   * - A `404` response is expected when authentication works and the employee
+   *   does not exist.
+   *
+   * @throws IntegrationProviderAuthenticationError
+   */
+  public async verifyAuthentication(employeeId: number = 0): Promise<void> {
     try {
-      const response = await this.request({
-        path: 'v1/employees/0',
+      await this.request({
+        path: `v1/employees/${employeeId}`,
       });
-
-      // A 200 is expected when authentication works and the employee exists A
-      // 404 is expected when authentication works and the employee does not
-      // exist There may be a better endpoint to verify authentication, but this
-      // one seems the most lightweight at this time.
-      if (response.status !== 200 && response.status !== 404) {
-        throw new StatusError({
-          message: 'Provider authentication failed',
-          statusCode: response.status,
-          statusText: response.statusText,
+    } catch (err) {
+      if (err.status !== 404) {
+        throw new IntegrationProviderAuthenticationError({
+          cause: err,
+          endpoint: err.endpoint,
+          status: err.status,
+          statusText: err.statusText,
         });
       }
-    } catch (err) {
-      throw new IntegrationProviderAuthenticationError({
-        cause: err,
-        endpoint: `https://api.bamboohr.com/api/gateway.php/${this.clientNamespace}/v1/employees/0`,
-        status: err.options ? err.options.statusCode : -1,
-        statusText: err.options ? err.options.statusText : '',
-      });
     }
   }
 

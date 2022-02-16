@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.7.2 - 2022-02-15
+
 - Fixed regression in `validateAuthentication`.
 
 ## 0.7.1 - 2022-02-10

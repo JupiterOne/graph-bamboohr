@@ -1,5 +1,8 @@
 import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
-import { Recording } from '@jupiterone/integration-sdk-testing';
+import { 
+  createMockIntegrationLogger,
+  Recording 
+} from '@jupiterone/integration-sdk-testing';
 
 import { integrationConfig } from '../test/config';
 import { setupBambooHRRecording } from '../test/recording';
@@ -37,7 +40,7 @@ describe('client APIs', () => {
       },
     });
 
-    const client = new APIClient(integrationConfig);
+    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
     await expect(client.verifyAuthentication()).resolves.toBeUndefined();
   });
 
@@ -50,7 +53,7 @@ describe('client APIs', () => {
       },
     });
 
-    const client = new APIClient(integrationConfig);
+    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
     await expect(client.verifyAuthentication(182372)).resolves.toBeUndefined();
   });
 
@@ -66,7 +69,7 @@ describe('client APIs', () => {
     const client = new APIClient({
       ...integrationConfig,
       clientAccessToken: 'invalid-test-token',
-    });
+    }, createMockIntegrationLogger());
     await expect(client.verifyAuthentication()).rejects.toThrowError(
       IntegrationProviderAuthenticationError,
     );
@@ -78,7 +81,7 @@ describe('client APIs', () => {
       name: 'iterateEmployees',
     });
 
-    const client = new APIClient(integrationConfig);
+    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
 
     const employees: BambooHREmployee[] = [];
     await client.iterateEmployees((employee) => {
@@ -97,7 +100,7 @@ describe('client APIs', () => {
       name: 'iterateUsers',
     });
 
-    const client = new APIClient(integrationConfig);
+    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
 
     const users: BambooHRUser[] = [];
     await client.iterateUsers((user) => {

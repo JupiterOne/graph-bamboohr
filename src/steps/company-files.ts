@@ -18,8 +18,9 @@ export function getCompanyFileKey(id: number): string {
 export async function fetchCompanyFiles({
   instance,
   jobState,
+  logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = new APIClient(instance.config);
+  const apiClient = new APIClient(instance.config, logger);
 
   const accountEntity = (await jobState.getData(
     ACCOUNT_ENTITY_DATA_KEY,

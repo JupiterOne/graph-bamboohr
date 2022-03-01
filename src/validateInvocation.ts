@@ -10,6 +10,7 @@ export default async function validateInvocation(
   context: IntegrationExecutionContext<IntegrationConfig>,
 ) {
   const { config } = context.instance;
+  const logger = context.logger;
 
   if (!config.clientNamespace || !config.clientAccessToken) {
     throw new IntegrationValidationError(
@@ -23,6 +24,6 @@ export default async function validateInvocation(
     );
   }
 
-  const apiClient = new APIClient(config);
+  const apiClient = new APIClient(config, logger);
   await apiClient.verifyAuthentication();
 }

@@ -35,8 +35,10 @@ export function getEmployeeKey(id: string | number): string {
 export async function fetchUsers({
   instance,
   jobState,
+  logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = new APIClient(instance.config);
+
+  const apiClient = new APIClient(instance.config, logger);
 
   const accountEntity = (await jobState.getData(
     ACCOUNT_ENTITY_DATA_KEY,
@@ -111,8 +113,9 @@ export async function fetchUsers({
 export async function fetchEmployees({
   instance,
   jobState,
+  logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = new APIClient(instance.config);
+  const apiClient = new APIClient(instance.config, logger);
 
   const accountEntity = (await jobState.getData(
     ACCOUNT_ENTITY_DATA_KEY,

@@ -4,6 +4,7 @@ import url from 'url';
 import {
   IntegrationProviderAPIError,
   IntegrationProviderAuthenticationError,
+  IntegrationLogger,
 } from '@jupiterone/integration-sdk-core';
 
 import {
@@ -27,13 +28,19 @@ export function normalizeClientNamespace(
   }
 }
 
+const MAX_RATE_LIMIT_WAIT = 100;
+const DEFAULT_RATE_LIMIT_WAIT = 3;
+
 export class APIClient {
   private readonly clientNamespace: string;
   private readonly clientAccessToken: string;
 
-  constructor(readonly config: IntegrationConfig) {
+  logger: IntegrationLogger;
+
+  constructor(readonly config: IntegrationConfig, logger: IntegrationLogger) {
     this.clientNamespace = normalizeClientNamespace(config.clientNamespace)!;
     this.clientAccessToken = config.clientAccessToken;
+    this.logger = logger;
 
     if (!this.clientNamespace) {
       throw new Error(
@@ -59,13 +66,18 @@ export class APIClient {
     headers = {},
     search = {},
     body,
+    attemptCounter = 1,
   }: {
     path: string;
     method?: 'GET' | 'POST';
     headers?: Record<string, string>;
     search?: Record<string, string | readonly string[]>;
     body?: RequestInit['body'];
+    attemptCounter?: number;
   }): Promise<Response> {
+    if (attemptCounter >= 10) {
+      throw new Error('Max API request attempts reached.');
+    }
     const requestUrl = new url.URL(this.withBaseUri(path));
     const searchParams = new url.URLSearchParams(search);
     if (requestUrl.search && searchParams.toString()) {
@@ -87,6 +99,11 @@ export class APIClient {
       body,
     });
 
+    if(response.status === 503) {
+      await this.handleRateLimitAwait(response.headers['Retry-After'], attemptCounter);
+      return this.request({path, method, headers, search, body, attemptCounter: attemptCounter + 1});
+    }
+
     if (!response.ok) {
       throw new IntegrationProviderAPIError({
         endpoint: requestUrl.toString(),
@@ -96,6 +113,45 @@ export class APIClient {
     }
 
     return response;
+  }
+
+  // Lightweight sleep function for rate limit errors.
+  private async sleepBeforeRetry(secondsToSleep: number) {
+    const retryAfterMs = secondsToSleep * 1000;
+    await new Promise((resolve) => setTimeout(resolve, retryAfterMs));
+  }
+
+  /**
+   * According to BambooHR documentation, a 429 error is a limit exceeded
+   * regarding adding employees.  A 503 is a "currently unavailable" 
+   * error that is most commonly due to rate limiting.  It may contain
+   * a 'Retry-After' value in the header specifying how long to wait.
+   * Unfortunately, we don't have documenation or examples for this, and
+   * the HTTP spec states ths can either be a second value or an HTTP-date.
+   * For now, we're checking if the value is a number and attempting to 
+   * handle either option with a max upper limit for how long we'll wait
+   * to avoid worst case scenarios for failed parsing.
+   * https://documentation.bamboohr.com/docs/api-details
+   */
+  async handleRateLimitAwait(retryAfterValue: any, attemptCount: number) {
+    let secondsToAwait = DEFAULT_RATE_LIMIT_WAIT * attemptCount;
+    if(retryAfterValue) {
+      this.logger.info(`Received a 503 response with a Retry-After value of `, retryAfterValue);
+      if (typeof retryAfterValue === 'number') {
+        secondsToAwait = Math.min(MAX_RATE_LIMIT_WAIT, retryAfterValue);
+      }
+      else {
+        const currentDateTime = new Date(Date.now());
+        const retryAfterDateTime = new Date(retryAfterValue)
+        secondsToAwait = Math.min(MAX_RATE_LIMIT_WAIT, (retryAfterDateTime.getTime() - currentDateTime.getTime()) / 1000);
+        this.logger.info(`Pausing for ${secondsToAwait} seconds`);
+      }
+      await this.sleepBeforeRetry(secondsToAwait);
+    }
+    else {
+      this.logger.info(`Received a 503 response with no specified Retry-After.  Pausing for ${DEFAULT_RATE_LIMIT_WAIT} seconds.`);
+    }
+    await this.sleepBeforeRetry(secondsToAwait);
   }
 
   /**

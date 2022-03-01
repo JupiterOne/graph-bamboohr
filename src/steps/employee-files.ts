@@ -17,8 +17,9 @@ export function getEmployeeFileKey(id: number): string {
 export async function fetchEmployeeFiles({
   instance,
   jobState,
+  logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = new APIClient(instance.config);
+  const apiClient = new APIClient(instance.config, logger);
 
   await jobState.iterateEntities(
     { _type: entities.USER._type },

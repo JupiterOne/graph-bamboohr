@@ -99,33 +99,8 @@ export class APIClient {
       body,
     });
 
-    // According to BambooHR documentation, a 429 error is a limit exceeded
-    // regarding adding employees.  A 503 is a "currently unavailable" 
-    // error that is most commonly due to rate limiting.  It may contain
-    // a 'Retry-After' value in the header specifying how long to wait.
-    // Unfortunately, we don't have documenation or examples for this, and
-    // the HTTP spec states ths can either be a second value or an HTTP-date.
-    // For now, we're checking if the value is a number and attempting to 
-    // handle either option with a max upper limit for how long we'll wait
-    // to avoid worst case scenarios for failed parsing.
-    // https://documentation.bamboohr.com/docs/api-details
     if(response.status === 503) {
-      let secondsToAwait = DEFAULT_RATE_LIMIT_WAIT * attemptCounter;
-      if(response.headers['Retry-After']) {
-        this.logger.info(`Received a 503 response with a Retry-After value of `, response.headers['Retry-After']);
-        if (typeof response.headers['Retry-After'] === 'number') {
-          secondsToAwait = Math.min(MAX_RATE_LIMIT_WAIT, response.headers['Retry-After']);
-        }
-        const currentDateTime = new Date(Date.now());
-        const retryAfterDateTime = new Date(response.headers['Retry-After'])
-        secondsToAwait = Math.min(MAX_RATE_LIMIT_WAIT, (retryAfterDateTime.getTime() - currentDateTime.getTime()) / 1000);
-        this.logger.info(`Pausing for ${secondsToAwait} seconds`);
-        await this.sleepBeforeRetry(secondsToAwait);
-      }
-      else {
-        this.logger.info(`Received a 503 response with no specified Retry-After.  Pausing for ${DEFAULT_RATE_LIMIT_WAIT} seconds.`);
-      }
-      await this.sleepBeforeRetry(secondsToAwait);
+      await this.handleRateLimitAwait(response.headers['Retry-After'], attemptCounter);
       return this.request({path, method, headers, search, body, attemptCounter: attemptCounter + 1});
     }
 
@@ -144,6 +119,39 @@ export class APIClient {
   private async sleepBeforeRetry(secondsToSleep: number) {
     const retryAfterMs = secondsToSleep * 1000;
     await new Promise((resolve) => setTimeout(resolve, retryAfterMs));
+  }
+
+  /**
+   * According to BambooHR documentation, a 429 error is a limit exceeded
+   * regarding adding employees.  A 503 is a "currently unavailable" 
+   * error that is most commonly due to rate limiting.  It may contain
+   * a 'Retry-After' value in the header specifying how long to wait.
+   * Unfortunately, we don't have documenation or examples for this, and
+   * the HTTP spec states ths can either be a second value or an HTTP-date.
+   * For now, we're checking if the value is a number and attempting to 
+   * handle either option with a max upper limit for how long we'll wait
+   * to avoid worst case scenarios for failed parsing.
+   * https://documentation.bamboohr.com/docs/api-details
+   */
+  async handleRateLimitAwait(retryAfterValue: any, attemptCount: number) {
+    let secondsToAwait = DEFAULT_RATE_LIMIT_WAIT * attemptCount;
+    if(retryAfterValue) {
+      this.logger.info(`Received a 503 response with a Retry-After value of `, retryAfterValue);
+      if (typeof retryAfterValue === 'number') {
+        secondsToAwait = Math.min(MAX_RATE_LIMIT_WAIT, retryAfterValue);
+      }
+      else {
+        const currentDateTime = new Date(Date.now());
+        const retryAfterDateTime = new Date(retryAfterValue)
+        secondsToAwait = Math.min(MAX_RATE_LIMIT_WAIT, (retryAfterDateTime.getTime() - currentDateTime.getTime()) / 1000);
+        this.logger.info(`Pausing for ${secondsToAwait} seconds`);
+      }
+      await this.sleepBeforeRetry(secondsToAwait);
+    }
+    else {
+      this.logger.info(`Received a 503 response with no specified Retry-After.  Pausing for ${DEFAULT_RATE_LIMIT_WAIT} seconds.`);
+    }
+    await this.sleepBeforeRetry(secondsToAwait);
   }
 
   /**

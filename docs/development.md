@@ -106,3 +106,12 @@ curl -i -u "${BAMBOOHR_API_KEY}:x" "https://api.bamboohr.com/api/gateway.php/${B
 curl -i -u "${BAMBOOHR_API_KEY}:x" "https://api.bamboohr.com/api/gateway.php/${BAMBOOHR_DOMAIN}/v1/meta/fields/"
 curl -i -u "${BAMBOOHR_API_KEY}:x" -H "Content-Type: application/json" --data "@${BAMBOOHR_EMPLOYEE_REPORT_PATH}" "https://api.bamboohr.com/api/gateway.php/${BAMBOOHR_DOMAIN}/v1/reports/custom?format=json&onlyCurrent=false"
 ```
+
+## Rate Limit Handling
+According to BambooHR documentation, a 429 error is a limit exceeded
+regarding adding employees.  A 503 is a "currently unavailable" 
+error that is most commonly due to rate limiting.  It may contain
+a 'Retry-After' value in the header specifying how long to wait.
+As we are only querying values from BambooHR at this time, we are
+only handling retries for 503 errors currently.  More information
+can be found in BambooHR's [Technical Overview](https://documentation.bamboohr.com/docs/api-details)

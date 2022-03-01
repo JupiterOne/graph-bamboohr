@@ -108,6 +108,7 @@ export class APIClient {
     // For now, we're checking if the value is a number and attempting to 
     // handle either option with a max upper limit for how long we'll wait
     // to avoid worst case scenarios for failed parsing.
+    // https://documentation.bamboohr.com/docs/api-details
     if(response.status === 503) {
       let secondsToAwait = DEFAULT_RATE_LIMIT_WAIT * attemptCounter;
       if(response.headers['Retry-After']) {

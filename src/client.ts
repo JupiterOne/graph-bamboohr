@@ -28,8 +28,8 @@ export function normalizeClientNamespace(
   }
 }
 
-const MAX_RATE_LIMIT_WAIT = 100;
-const DEFAULT_RATE_LIMIT_WAIT = 3;
+const MAX_RATE_LIMIT_WAIT = 3600;
+const DEFAULT_RATE_LIMIT_WAIT = 10;
 
 export class APIClient {
   private readonly clientNamespace: string;
@@ -75,7 +75,7 @@ export class APIClient {
     body?: RequestInit['body'];
     attemptCounter?: number;
   }): Promise<Response> {
-    if (attemptCounter >= 10) {
+    if (attemptCounter > 10) {
       throw new Error('Max API request attempts reached.');
     }
     const requestUrl = new url.URL(this.withBaseUri(path));
@@ -100,7 +100,7 @@ export class APIClient {
     });
 
     if(response.status === 503) {
-      await this.handleRateLimitAwait(response.headers['Retry-After'], attemptCounter);
+      await this.handleRateLimitAwait(response.headers.get('Retry-After'), attemptCounter);
       return this.request({path, method, headers, search, body, attemptCounter: attemptCounter + 1});
     }
 
@@ -137,20 +137,21 @@ export class APIClient {
     let secondsToAwait = DEFAULT_RATE_LIMIT_WAIT * attemptCount;
     if(retryAfterValue) {
       this.logger.info(`Received a 503 response with a Retry-After value of `, retryAfterValue);
-      if (typeof retryAfterValue === 'number') {
+      // If we're smaller than the current date, we've gotten a number of seconds to wait
+      // instead of a datetime.
+      if (retryAfterValue < Date.now()) {
         secondsToAwait = Math.min(MAX_RATE_LIMIT_WAIT, retryAfterValue);
       }
       else {
         const currentDateTime = new Date(Date.now());
-        const retryAfterDateTime = new Date(retryAfterValue)
+        const retryAfterDateTime = new Date(retryAfterValue);
         secondsToAwait = Math.min(MAX_RATE_LIMIT_WAIT, (retryAfterDateTime.getTime() - currentDateTime.getTime()) / 1000);
-        this.logger.info(`Pausing for ${secondsToAwait} seconds`);
       }
-      await this.sleepBeforeRetry(secondsToAwait);
     }
     else {
-      this.logger.info(`Received a 503 response with no specified Retry-After.  Pausing for ${DEFAULT_RATE_LIMIT_WAIT} seconds.`);
+      this.logger.info(`Received a 503 response with no specified Retry-After.`);
     }
+    this.logger.info(`Pausing for ${secondsToAwait} seconds`);
     await this.sleepBeforeRetry(secondsToAwait);
   }
 

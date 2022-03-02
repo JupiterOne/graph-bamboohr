@@ -13,6 +13,8 @@ import {
   BambooHRUser,
 } from './types';
 
+import nock from 'nock';
+
 describe('normalizeClientNamespace', () => {
   test.each;
   test.each([
@@ -120,4 +122,20 @@ describe('client APIs', () => {
       }),
     );
   });
+
+  test('503withretryafter', async () => {
+    const scope = nock(`https://api.bamboohr.com/api/gateway.php/${normalizeClientNamespace(integrationConfig.clientNamespace)}`)
+      .get('/v1/meta/users')
+      .times(10)
+      .reply(503, 'Service Unavailable', {
+        'Content-Type': 'text/html',
+        'Retry-After': '0.1',
+      });
+
+    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
+    const users: BambooHRUser[] = [];
+    await expect(client.iterateUsers((user) => {users.push(user)})).rejects.toThrowError('Max API request attempts reached.');
+
+    scope.done();
+  })
 });

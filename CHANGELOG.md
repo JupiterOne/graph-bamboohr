@@ -11,6 +11,11 @@ and this project adheres to
 ## 0.8.0 - 2022-03-02
 
 ### Fixed
+- Updated how we're pulling 'Retry-After' and increased default timeout.
+
+## 0.8.0 - 2022-03-02
+
+### Fixed
 - 503 coded responses are now handled as potential rate limit errors.
 
 ## 0.7.2 - 2022-02-15

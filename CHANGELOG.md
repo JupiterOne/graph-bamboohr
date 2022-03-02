@@ -8,6 +8,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.8.1 - 2022-03-02
+
+### Fixed
+- Updated how we're pulling 'Retry-After' and increased default timeout.
+
 ## 0.8.0 - 2022-03-02
 
 ### Fixed

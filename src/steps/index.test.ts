@@ -173,6 +173,9 @@ describe('BambooHR', () => {
           name: {
             type: 'string',
           },
+          lastLogin: {
+            type: 'number',
+          }
         },
         required: [],
       },

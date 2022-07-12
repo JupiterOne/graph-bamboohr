@@ -85,6 +85,7 @@ export async function fetchUsers({
           mobilePhone: employee?.mobilePhone,
           workPhone: employee?.workPhone,
           supervisor: employee?.supervisor,
+          lastLogin: parseTimePropertyValue(user.lastLogin),
         },
       },
     });

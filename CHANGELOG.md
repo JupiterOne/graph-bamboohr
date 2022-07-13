@@ -8,6 +8,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 0.8.2 - 2022-07-13
+
+### Added
+- User entities now have a lastLogin value included.
+
 ## 0.8.1 - 2022-03-02
 
 ### Fixed

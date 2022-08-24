@@ -31,7 +31,7 @@ type StepBase<TConfig extends IntegrationInstanceConfig> = Omit<
 
 expect.extend({
   toImplementSpec<
-    TConfig extends IntegrationInstanceConfig = IntegrationInstanceConfig
+    TConfig extends IntegrationInstanceConfig = IntegrationInstanceConfig,
   >(
     integration: IntegrationInvocationConfig<TConfig>,
     spec: IntegrationSpecConfig<TConfig>,

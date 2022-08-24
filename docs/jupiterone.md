@@ -56,7 +56,7 @@ If you need help with this integration, please contact
 
 ### In JupiterOne
 
-1. From the configuration **Gear Icon**, select **Integrations**.
+1. From the top navigation of the J1 Search homepage, select **Integrations**
 2. Scroll to the **BambooHR** integration tile and click it.
 3. Click the **Add Configuration** button.
 4. Enter the **Account Name** by which you'd like to identify this BambooHR
@@ -72,7 +72,7 @@ If you need help with this integration, please contact
 
 # How to Uninstall
 
-1. From the configuration **Gear Icon**, select **Integrations**.
+1. From the top navigation of the J1 Search homepage, select **Integrations**
 2. Scroll to the **BambooHR** integration tile and click it.
 3. Identify and click the **integration to delete**.
 4. Click the **trash can** icon.

@@ -1,7 +1,7 @@
 import { IntegrationProviderAuthenticationError } from '@jupiterone/integration-sdk-core';
-import { 
+import {
   createMockIntegrationLogger,
-  Recording 
+  Recording,
 } from '@jupiterone/integration-sdk-testing';
 
 import { integrationConfig } from '../test/config';
@@ -42,7 +42,10 @@ describe('client APIs', () => {
       },
     });
 
-    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
+    const client = new APIClient(
+      integrationConfig,
+      createMockIntegrationLogger(),
+    );
     await expect(client.verifyAuthentication()).resolves.toBeUndefined();
   });
 
@@ -55,7 +58,10 @@ describe('client APIs', () => {
       },
     });
 
-    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
+    const client = new APIClient(
+      integrationConfig,
+      createMockIntegrationLogger(),
+    );
     await expect(client.verifyAuthentication(182372)).resolves.toBeUndefined();
   });
 
@@ -68,10 +74,13 @@ describe('client APIs', () => {
       },
     });
 
-    const client = new APIClient({
-      ...integrationConfig,
-      clientAccessToken: 'invalid-test-token',
-    }, createMockIntegrationLogger());
+    const client = new APIClient(
+      {
+        ...integrationConfig,
+        clientAccessToken: 'invalid-test-token',
+      },
+      createMockIntegrationLogger(),
+    );
     await expect(client.verifyAuthentication()).rejects.toThrowError(
       IntegrationProviderAuthenticationError,
     );
@@ -83,7 +92,10 @@ describe('client APIs', () => {
       name: 'iterateEmployees',
     });
 
-    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
+    const client = new APIClient(
+      integrationConfig,
+      createMockIntegrationLogger(),
+    );
 
     const employees: BambooHREmployee[] = [];
     await client.iterateEmployees((employee) => {
@@ -102,7 +114,10 @@ describe('client APIs', () => {
       name: 'iterateUsers',
     });
 
-    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
+    const client = new APIClient(
+      integrationConfig,
+      createMockIntegrationLogger(),
+    );
 
     const users: BambooHRUser[] = [];
     await client.iterateUsers((user) => {
@@ -124,7 +139,11 @@ describe('client APIs', () => {
   });
 
   test('503withretryafter', async () => {
-    const scope = nock(`https://api.bamboohr.com/api/gateway.php/${normalizeClientNamespace(integrationConfig.clientNamespace)}`)
+    const scope = nock(
+      `https://api.bamboohr.com/api/gateway.php/${normalizeClientNamespace(
+        integrationConfig.clientNamespace,
+      )}`,
+    )
       .get('/v1/meta/users')
       .times(10)
       .reply(503, 'Service Unavailable', {
@@ -132,10 +151,17 @@ describe('client APIs', () => {
         'Retry-After': '0.1',
       });
 
-    const client = new APIClient(integrationConfig, createMockIntegrationLogger());
+    const client = new APIClient(
+      integrationConfig,
+      createMockIntegrationLogger(),
+    );
     const users: BambooHRUser[] = [];
-    await expect(client.iterateUsers((user) => {users.push(user)})).rejects.toThrowError('Max API request attempts reached.');
+    await expect(
+      client.iterateUsers((user) => {
+        users.push(user);
+      }),
+    ).rejects.toThrowError('Max API request attempts reached.');
 
     scope.done();
-  })
+  });
 });

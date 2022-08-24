@@ -37,7 +37,6 @@ export async function fetchUsers({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-
   const apiClient = new APIClient(instance.config, logger);
 
   const accountEntity = (await jobState.getData(

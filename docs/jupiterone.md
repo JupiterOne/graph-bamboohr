@@ -1,4 +1,4 @@
-# Integration with JupiterOne
+# BambooHR
 
 ## BambooHR + JupiterOne Integration Benefits
 
